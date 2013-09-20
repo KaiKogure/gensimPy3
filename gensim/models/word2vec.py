@@ -144,9 +144,9 @@ class Word2Vec(utils.SaveLoad):
         logger.info("constructing a huffman tree from %i words" % len(self.vocab))
 
         # build the huffman tree
-        heap = self.vocab.values()
+        heap = list(self.vocab.values())
         heapq.heapify(heap)
-        for i in xrange(len(self.vocab) - 1):
+        for i in range(len(self.vocab) - 1):
             min1, min2 = heapq.heappop(heap), heapq.heappop(heap)
             heapq.heappush(heap, Vocab(count=min1.count + min2.count, index=i + len(self.vocab), left=min1, right=min2))
 
@@ -172,7 +172,7 @@ class Word2Vec(utils.SaveLoad):
         """Build vocabulary from a sequence of sentences."""
         logger.info("collecting all words and their counts")
         sentence_no, vocab = -1, {}
-        total_words = lambda: sum(v.count for v in vocab.itervalues())
+        total_words = lambda: sum(v.count for v in vocab.values())
         for sentence_no, sentence in enumerate(sentences):
             if sentence_no % 10000 == 0:
                 logger.info("PROGRESS: at sentence #%i, processed %i words and %i word types" %
@@ -185,7 +185,7 @@ class Word2Vec(utils.SaveLoad):
 
         # assign a unique index to each word
         self.vocab, self.index2word = {}, []
-        for word, v in vocab.iteritems():
+        for word, v in vocab.items():
             if v.count >= self.min_count:
                 v.index = len(self.vocab)
                 self.index2word.append(word)
@@ -205,7 +205,7 @@ class Word2Vec(utils.SaveLoad):
         logger.info("training model with %i words and %i features" % (len(self.vocab), self.layer1_size))
 
         # iterate over documents, training the model one sentence at a time
-        total_words = total_words or sum(v.count for v in self.vocab.itervalues())
+        total_words = total_words or sum(v.count for v in self.vocab.values())
         alpha = self.alpha
         word_count, sentence_no, start = 0, -1, time.clock()
         for sentence_no, sentence in enumerate(sentences):
@@ -219,7 +219,7 @@ class Word2Vec(utils.SaveLoad):
                     (sentence_no, 100.0 * word_count / total_words, alpha, word_count / elapsed if elapsed else 0.0))
             words = [self.vocab.get(word, None) for word in sentence]  # replace OOV words with None
             train_sentence(self, words, alpha)
-            word_count += len(filter(None, words))  # don't consider OOV words for the statistics
+            word_count += len([_f for _f in words if _f])  # don't consider OOV words for the statistics
         logger.info("training took %.1fs" % (time.clock() - start))
 
 
@@ -241,7 +241,7 @@ class Word2Vec(utils.SaveLoad):
         with open(fname, 'wb') as fout:
             fout.write("%s %s\n" % self.syn0.shape)
             # store in sorted order: most frequent words at the top
-            for word, vocab in sorted(self.vocab.iteritems(), key=lambda item: -item[1].count):
+            for word, vocab in sorted(iter(self.vocab.items()), key=lambda item: -item[1].count):
                 row = self.syn0[vocab.index]
                 if binary:
                     fout.write("%s %s\n" % (word, row.tostring()))
@@ -262,12 +262,12 @@ class Word2Vec(utils.SaveLoad):
         logger.info("loading projection weights from %s" % (fname))
         with open(fname) as fin:
             header = fin.readline()
-            vocab_size, layer1_size = map(int, header.split())  # throws for invalid file format
+            vocab_size, layer1_size = list(map(int, header.split()))  # throws for invalid file format
             result = Word2Vec(size=layer1_size)
             result.syn0 = empty((vocab_size, layer1_size), dtype=REAL)
             if binary:
                 binary_len = dtype(REAL).itemsize * layer1_size
-                for line_no in xrange(vocab_size):
+                for line_no in range(vocab_size):
                     # mixed text and binary: read text first, then binary
                     word = []
                     while True:
@@ -284,7 +284,7 @@ class Word2Vec(utils.SaveLoad):
                 for line_no, line in enumerate(fin):
                     parts = line.split()
                     assert len(parts) == layer1_size + 1
-                    word, weights = parts[0], map(REAL, parts[1:])
+                    word, weights = parts[0], list(map(REAL, parts[1:]))
                     result.vocab[word] = Vocab(index=line_no, count=vocab_size - line_no)
                     result.index2word.append(word)
                     result.syn0[line_no] = weights
@@ -311,8 +311,8 @@ class Word2Vec(utils.SaveLoad):
         self.init_sims()
 
         # add weights for each word, if not already present; default to 1.0 for positive and -1.0 for negative words
-        positive = [(word, 1.0) if isinstance(word, basestring) else word for word in positive]
-        negative = [(word, -1.0) if isinstance(word, basestring) else word for word in negative]
+        positive = [(word, 1.0) if isinstance(word, str) else word for word in positive]
+        negative = [(word, -1.0) if isinstance(word, str) else word for word in negative]
         all_words, mean = set(), []
         for word, weight in positive + negative:
             if word in self.vocab:
@@ -373,8 +373,8 @@ class Word2Vec(utils.SaveLoad):
         This method corresponds to the `compute-accuracy` script of the original C word2vec.
 
         """
-        ok_vocab = dict(sorted(self.vocab.iteritems(), key=lambda item: -item[1].count)[:restrict_vocab])
-        ok_index = set(v.index for v in ok_vocab.itervalues())
+        ok_vocab = dict(sorted(iter(self.vocab.items()), key=lambda item: -item[1].count)[:restrict_vocab])
+        ok_index = set(v.index for v in ok_vocab.values())
 
         def log_accuracy(section):
             correct, incorrect = section['correct'], section['incorrect']
@@ -477,7 +477,7 @@ if __name__ == "__main__":
     # check and process cmdline input
     program = os.path.basename(sys.argv[0])
     if len(sys.argv) < 3:
-        print globals()['__doc__'] % locals()
+        print(globals()['__doc__'] % locals())
         sys.exit(1)
     infile, outfile = sys.argv[1:3]
     from gensim.models import Word2Vec

@@ -10,8 +10,8 @@ by Dr. E. Garcia, admin@miislita.com
 See http://www.miislita.com for further details.
 """
 
-from __future__ import division  # always use floats
-from __future__ import with_statement
+  # always use floats
+
 
 import logging
 import tempfile

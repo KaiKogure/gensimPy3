@@ -16,11 +16,11 @@ This means that, unline plain Dictionary, several words may map to the same id
 
 """
 
-from __future__ import with_statement
+
 
 import logging
 import itertools
-import UserDict
+import collections
 import zlib
 
 from gensim import utils
@@ -30,7 +30,7 @@ logger = logging.getLogger('gensim.corpora.hashdictionary')
 
 
 
-class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
+class HashDictionary(utils.SaveLoad, collections.MutableMapping):
     """
     HashDictionary encapsulates the mapping between normalized words and their
     integer ids.
@@ -77,12 +77,34 @@ class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
         return self.id2token.get(tokenid, set())
 
 
+    def __setitem__(self, key, value):
+        try:
+            i = self.keylist.index(key)
+            self.valuelist[i] = value
+        except ValueError:
+            self.keylist.append(key)
+            self.valuelist.append(value)
+
+
+    def __delitem__(self, key):
+        try:
+            i = self.keylist.index(key)
+        except ValueError:
+            raise KeyError
+        self.keylist.pop(i)
+        self.valuelist.pop(i)
+
+
+    def __iter__(self):
+        return iter(self.store)
+
+
     def restricted_hash(self, token):
         """
         Calculate id of the given token. Also keep track of what words were mapped
         to what ids, for debugging reasons.
         """
-        h = self.myhash(token) % self.id_range
+        h = self.myhash(token.encode()) % self.id_range
         if self.debug:
             self.token2id[token] = h
             self.id2token.setdefault(h, set()).add(token)
@@ -98,7 +120,7 @@ class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
 
     def keys(self):
         """Return a list of all token ids."""
-        return range(len(self))
+        return list(range(len(self)))
 
 
     def __str__(self):
@@ -158,11 +180,11 @@ class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
             if self.debug:
                 # increment document count for each unique tokenid that appeared in the document
                 # done here, because several words may map to the same tokenid
-                for tokenid in result.iterkeys():
+                for tokenid in result.keys():
                     self.dfs[tokenid] = self.dfs.get(tokenid, 0) + 1
 
         # return tokenids, in ascending id order
-        result = sorted(result.iteritems())
+        result = sorted(result.items())
         if return_missing:
             return result, missing
         else:
@@ -185,13 +207,13 @@ class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
         footprint.
         """
         no_above_abs = int(no_above * self.num_docs) # convert fractional threshold to absolute threshold
-        ok = [item for item in self.dfs_debug.iteritems() if no_below <= item[1] <= no_above_abs]
+        ok = [item for item in self.dfs_debug.items() if no_below <= item[1] <= no_above_abs]
         ok = frozenset(word for word, freq in sorted(ok, key=lambda item: -item[1])[:keep_n])
 
-        self.dfs_debug = dict((word, freq) for word, freq in self.dfs_debug.iteritems() if word in ok)
-        self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.iteritems() if token in self.dfs_debug)
-        self.id2token = dict((tokenid, set(token for token in tokens if token in self.dfs_debug)) for tokenid, tokens in self.id2token.iteritems())
-        self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.iteritems() if self.id2token.get(tokenid, set()))
+        self.dfs_debug = dict((word, freq) for word, freq in self.dfs_debug.items() if word in ok)
+        self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.items() if token in self.dfs_debug)
+        self.id2token = dict((tokenid, set(token for token in tokens if token in self.dfs_debug)) for tokenid, tokens in self.id2token.items())
+        self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.items() if self.id2token.get(tokenid, set()))
 
         # for word->document frequency
         logger.info("kept statistics for which were in no less than %i and no more than %i (=%.1f%%) documents" %
@@ -209,10 +231,10 @@ class HashDictionary(utils.SaveLoad, UserDict.DictMixin):
         """
         logger.info("saving HashDictionary mapping to %s" % fname)
         with utils.smart_open(fname, 'wb') as fout:
-            for tokenid in self.keys():
+            for tokenid in list(self.keys()):
                 words = sorted(self[tokenid])
                 if words:
                     words_df = [(word, self.dfs_debug.get(word, 0)) for word in words]
                     words_df = ["%s(%i)" % item for item in sorted(words_df, key=lambda item: -item[1])]
-                    fout.write("%i\t%i\t%s\n" % (tokenid, self.dfs.get(tokenid, 0), '\t'.join(words_df)))
+                    fout.write(("%i\t%i\t%s\n" % (tokenid, self.dfs.get(tokenid, 0), '\t'.join(words_df))).encode())
 #endclass HashDictionary

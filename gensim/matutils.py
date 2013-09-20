@@ -8,7 +8,7 @@
 This module contains math helper functions.
 """
 
-from __future__ import with_statement
+
 
 
 import logging
@@ -82,7 +82,7 @@ def corpus2csc(corpus, num_terms=None, dtype=numpy.float64, num_docs=None, num_n
             num_docs = corpus.num_docs
         if num_nnz is None:
             num_nnz = corpus.num_nnz
-    except AttributeError, e:
+    except AttributeError as e:
         pass # not a MmCorpus...
     if printprogress:
         logger.info("creating sparse matrix from corpus")
@@ -178,7 +178,7 @@ def sparse2full(doc, length):
     """
     result = numpy.zeros(length, dtype=numpy.float32) # fill with zeroes (default value)
     doc = dict(doc)
-    result[doc.keys()] = doc.values() # overwrite some of the zeroes with explicit values
+    result[list(doc.keys())] = list(doc.values()) # overwrite some of the zeroes with explicit values
     return result
 
 
@@ -190,7 +190,7 @@ def full2sparse(vec, eps=1e-9):
     """
     vec = numpy.asarray(vec, dtype=float)
     nnz = numpy.nonzero(abs(vec) > eps)[0]
-    return zip(nnz, vec.take(nnz))
+    return list(zip(nnz, vec.take(nnz)))
 
 dense2vec = full2sparse
 
@@ -206,7 +206,7 @@ def full2sparse_clipped(vec, topn, eps=1e-9):
     vec = numpy.asarray(vec, dtype=float)
     nnz = numpy.nonzero(abs(vec) > eps)[0]
     biggest = nnz.take(argsort(vec.take(nnz), topn))
-    return zip(biggest, vec.take(biggest))
+    return list(zip(biggest, vec.take(biggest)))
 
 
 def corpus2dense(corpus, num_terms):
@@ -250,8 +250,8 @@ class Sparse2Corpus(object):
             self.sparse = sparse.tocsr().T # make sure shape[1]=number of docs (needed in len())
 
     def __iter__(self):
-        for indprev, indnow in itertools.izip(self.sparse.indptr, self.sparse.indptr[1:]):
-            yield zip(self.sparse.indices[indprev:indnow], self.sparse.data[indprev:indnow])
+        for indprev, indnow in zip(self.sparse.indptr, self.sparse.indptr[1:]):
+            yield list(zip(self.sparse.indices[indprev:indnow], self.sparse.data[indprev:indnow]))
 
     def __len__(self):
         return self.sparse.shape[1]
@@ -295,7 +295,7 @@ def unitvec(vec):
             return vec
 
     try:
-        first = iter(vec).next() # is there at least one element?
+        first = next(iter(vec)) # is there at least one element?
     except:
         return vec
 
@@ -314,12 +314,12 @@ def cossim(vec1, vec2):
     vec1, vec2 = dict(vec1), dict(vec2)
     if not vec1 or not vec2:
         return 0.0
-    vec1len = 1.0 * math.sqrt(sum(val * val for val in vec1.itervalues()))
-    vec2len = 1.0 * math.sqrt(sum(val * val for val in vec2.itervalues()))
+    vec1len = 1.0 * math.sqrt(sum(val * val for val in vec1.values()))
+    vec2len = 1.0 * math.sqrt(sum(val * val for val in vec2.values()))
     assert vec1len > 0.0 and vec2len > 0.0, "sparse documents must not contain any explicit zero entries"
     if len(vec2) < len(vec1):
         vec1, vec2 = vec2, vec1 # swap references so that we iterate over the shorter vector
-    result = sum(value * vec2.get(index, 0.0) for index, value in vec1.iteritems())
+    result = sum(value * vec2.get(index, 0.0) for index, value in vec1.items())
     result /= vec1len * vec2len # rescale by vector lengths
     return result
 
@@ -380,12 +380,12 @@ class MmWriter(object):
 
 
     def write_headers(self, num_docs, num_terms, num_nnz):
-        self.fout.write(MmWriter.HEADER_LINE)
+        self.fout.write(MmWriter.HEADER_LINE.encode())
 
         if num_nnz < 0:
             # we don't know the matrix shape/density yet, so only log a general line
             logger.info("saving sparse matrix to %s" % self.fname)
-            self.fout.write(' ' * 50 + '\n') # 48 digits must be enough for everybody
+            self.fout.write((' ' * 50 + '\n').encode()) # 48 digits must be enough for everybody
         else:
             logger.info("saving sparse %sx%s matrix with %i non-zero entries to %s" %
                          (num_docs, num_terms, num_nnz, self.fname))
@@ -399,7 +399,7 @@ class MmWriter(object):
         if len(stats) > 50:
             raise ValueError('Invalid stats: matrix too large!')
         self.fout.seek(len(MmWriter.HEADER_LINE))
-        self.fout.write(stats)
+        self.fout.write(stats.encode())
 
 
     def write_vector(self, docno, vector):
@@ -412,7 +412,7 @@ class MmWriter(object):
         assert self.last_docno < docno, "documents %i and %i not in sequential order!" % (self.last_docno, docno)
         vector = sorted((i, w) for i, w in vector if abs(w) > 1e-12) # ignore near-zero entries
         for termid, weight in vector: # write term ids in sorted order
-            self.fout.write("%i %i %s\n" % (docno + 1, termid + 1, weight)) # +1 because MM format starts counting from 1
+            self.fout.write(("%i %i %s\n" % (docno + 1, termid + 1, weight)).encode()) # +1 because MM format starts counting from 1
         self.last_docno = docno
         return (vector[-1][0], len(vector)) if vector else (-1, 0)
 
@@ -504,16 +504,16 @@ class MmReader(object):
         """
         logger.info("initializing corpus reader from %s" % input)
         self.input, self.transposed = input, transposed
-        if isinstance(input, basestring):
+        if isinstance(input, str):
             input = open(input)
-        header = input.next().strip()
+        header = next(input).strip()
         if not header.lower().startswith('%%matrixmarket matrix coordinate real general'):
             raise ValueError("File %s not in Matrix Market format with coordinate real general; instead found: \n%s" %
                              (self.input, header))
         self.num_docs = self.num_terms = self.num_nnz = 0
         for lineno, line in enumerate(input):
             if not line.startswith('%'):
-                self.num_docs, self.num_terms, self.num_nnz = map(int, line.split())
+                self.num_docs, self.num_terms, self.num_nnz = list(map(int, line.split()))
                 if not self.transposed:
                     self.num_docs, self.num_terms = self.num_terms, self.num_docs
                 break
@@ -546,7 +546,7 @@ class MmReader(object):
         yielded where appropriate, even if they are not explicitly stored in the
         Matrix Market file.
         """
-        if isinstance(self.input, basestring):
+        if isinstance(self.input, str):
             fin = open(self.input)
         else:
             fin = self.input
@@ -567,7 +567,7 @@ class MmReader(object):
 
                 # return implicit (empty) documents between previous id and new id
                 # too, to keep consistent document numbering and corpus length
-                for previd in xrange(previd + 1, docid):
+                for previd in range(previd + 1, docid):
                     yield previd, []
 
                 # from now on start adding fields to a new document, with a new id
@@ -582,7 +582,7 @@ class MmReader(object):
 
         # return empty documents between the last explicit document and the number
         # of documents as specified in the header
-        for previd in xrange(previd + 1, self.num_docs):
+        for previd in range(previd + 1, self.num_docs):
             yield previd, []
 
 
@@ -592,7 +592,7 @@ class MmReader(object):
         # them with a special offset, -1.
         if offset == -1:
             return []
-        if isinstance(self.input, basestring):
+        if isinstance(self.input, str):
             fin = open(self.input)
         else:
             fin = self.input

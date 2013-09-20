@@ -64,7 +64,7 @@ class DmlConfig(object):
 
     def __str__(self):
         return ("DmlConfig(id=%s, sources=[%s], acceptLangs=[%s])" %
-                (self.configId, ', '.join(self.sources.iterkeys()), ', '.join(self.acceptLangs)))
+                (self.configId, ', '.join(iter(self.sources.keys())), ', '.join(self.acceptLangs)))
 #endclass DmlConfig
 
 
@@ -144,7 +144,7 @@ class DmlCorpus(interfaces.CorpusABC):
         self.config = config
         self.documents = []
         logger.info("processing config %s" % config)
-        for sourceId, source in config.sources.iteritems():
+        for sourceId, source in config.sources.items():
             logger.info("processing source '%s'" % sourceId)
             accepted = []
             for articleUri in source.findArticles():
@@ -170,7 +170,7 @@ class DmlCorpus(interfaces.CorpusABC):
     def saveDictionary(self, fname):
         logger.info("saving dictionary mapping to %s" % fname)
         fout = open(fname, 'w')
-        for tokenId, token in self.dictionary.id2token.iteritems():
+        for tokenId, token in self.dictionary.id2token.items():
             fout.write("%i\t%s\n" % (tokenId, token))
         fout.close()
 

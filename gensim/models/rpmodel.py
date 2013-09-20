@@ -61,7 +61,7 @@ class RpModel(interfaces.TransformationABC):
             self.id2word = utils.dict_from_corpus(corpus)
             self.num_terms = len(self.id2word)
         else:
-            self.num_terms = 1 + max([-1] + self.id2word.keys())
+            self.num_terms = 1 + max([-1] + list(self.id2word.keys()))
 
         shape = self.num_topics, self.num_terms
         logger.info("constructing %s random matrix" % str(shape))

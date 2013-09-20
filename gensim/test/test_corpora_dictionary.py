@@ -112,7 +112,7 @@ class TestDictionary(unittest.TestCase):
         self.assertRaises(TypeError, d.doc2bow, "žluťoučký")
 
         # unicode must be converted to utf8
-        self.assertEqual(d.doc2bow([u'\u017elu\u0165ou\u010dk\xfd']), [(0, 1)])
+        self.assertEqual(d.doc2bow(['\u017elu\u0165ou\u010dk\xfd']), [(0, 1)])
 
     def test_saveAsText_and_loadFromText(self):
         """`Dictionary` can be saved as textfile and loaded again from textfile. """

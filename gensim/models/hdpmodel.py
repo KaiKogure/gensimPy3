@@ -34,7 +34,7 @@ The algorithm:
 
 """
 
-from __future__ import with_statement
+
 
 import logging, itertools, time
 import numpy as np
@@ -97,7 +97,7 @@ def lda_e_step(doc_word_ids, doc_word_counts, alpha, beta, max_iter=100):
     betad = beta[:, doc_word_ids]
     phinorm = np.dot(expElogtheta, betad) + 1e-100
     counts = np.array(doc_word_counts)
-    for _ in xrange(max_iter):
+    for _ in range(max_iter):
         lastgamma = gamma
 
         gamma = alpha + expElogtheta * np.dot(counts / phinorm, betad.T)
@@ -175,7 +175,7 @@ class HdpModel(interfaces.TransformationABC):
 
         self.m_var_sticks = np.zeros((2, T - 1))
         self.m_var_sticks[0] = 1.0
-        self.m_var_sticks[1] = range(T - 1, 0, -1)
+        self.m_var_sticks[1] = list(range(T - 1, 0, -1))
         self.m_varphi_ss = np.zeros(T)
 
         self.m_lambda = np.random.gamma(1.0, 1.0, (T, self.m_W)) * self.m_D * 100 / (T * self.m_W) - eta
@@ -269,7 +269,7 @@ class HdpModel(interfaces.TransformationABC):
         count = 0
         for doc in chunk:
             if len(doc) > 0:
-                doc_word_ids, doc_word_counts = zip(*doc)
+                doc_word_ids, doc_word_counts = list(zip(*doc))
                 doc_score = self.doc_e_step(doc, ss, Elogsticks_1st,
                     word_list, unique_words, doc_word_ids,
                     doc_word_counts, self.m_var_converge)
@@ -420,7 +420,7 @@ class HdpModel(interfaces.TransformationABC):
         so that if (for example) we want to print out the
         topics we've learned we'll get the correct behavior.
         """
-        for w in xrange(self.m_W):
+        for w in range(self.m_W):
             self.m_lambda[:, w] *= np.exp(self.m_r[-1] -
                                           self.m_r[self.m_timestamp[w]])
         self.m_Elogbeta = sp.psi(self.m_eta + self.m_lambda) - \
@@ -501,7 +501,7 @@ class HdpModel(interfaces.TransformationABC):
         total_words = 0
         for i, doc in enumerate(corpus):
             if len(doc) > 0:
-                doc_word_ids, doc_word_counts = zip(*doc)
+                doc_word_ids, doc_word_counts = list(zip(*doc))
                 (likelihood, gamma) = lda_e_step(doc_word_ids, doc_word_counts, lda_alpha, lda_beta)
                 theta = gamma / np.sum(gamma)
                 lda_betad = lda_beta[:, doc_word_ids]
@@ -551,11 +551,11 @@ class HdpTopicFormatter(object):
 
         topics = min(topics, len(self.data))
 
-        for k in xrange(topics):
+        for k in range(topics):
             lambdak = list(self.data[k, :])
             lambdak = lambdak / sum(lambdak)
 
-            temp = zip(lambdak, xrange(len(lambdak)))
+            temp = list(zip(lambdak, list(range(len(lambdak)))))
             temp = sorted(temp, key=lambda x: x[0], reverse=True)
 
             topic_terms = self.show_topic_terms(temp, topn)

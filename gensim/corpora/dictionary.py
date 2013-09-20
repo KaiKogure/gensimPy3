@@ -15,11 +15,11 @@ save/loaded from disk (via :func:`Dictionary.save` and :func:`Dictionary.load` m
 with other dictionary (:func:`Dictionary.merge_with`) etc.
 """
 
-from __future__ import with_statement
+
 
 import logging
 import itertools
-import UserDict
+import collections
 
 from gensim import utils
 
@@ -27,7 +27,7 @@ from gensim import utils
 logger = logging.getLogger('gensim.corpora.dictionary')
 
 
-class Dictionary(utils.SaveLoad, UserDict.DictMixin):
+class Dictionary(utils.SaveLoad, collections.MutableMapping):
     """
     Dictionary encapsulates the mapping between normalized words and their integer ids.
 
@@ -51,13 +51,35 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         if len(self.id2token) != len(self.token2id):
             # the word->id mapping has changed (presumably via add_documents);
             # recompute id->word accordingly
-            self.id2token = dict((v, k) for k, v in self.token2id.iteritems())
+            self.id2token = dict((v, k) for k, v in self.token2id.items())
         return self.id2token[tokenid] # will throw for non-existent ids
+
+
+    def __setitem__(self, key, value):
+        try:
+            i = self.keylist.index(key)
+            self.valuelist[i] = value
+        except ValueError:
+            self.keylist.append(key)
+            self.valuelist.append(value)
+
+
+    def __delitem__(self, key):
+        try:
+            i = self.keylist.index(key)
+        except ValueError:
+            raise KeyError
+        self.keylist.pop(i)
+        self.valuelist.pop(i)
+
+
+    def __iter__(self):
+        return iter(self.store)
 
 
     def keys(self):
         """Return a list of all token ids."""
-        return self.token2id.values()
+        return list(self.token2id.values())
 
 
     def __len__(self):
@@ -112,9 +134,9 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         """
         result = {}
         missing = {}
-        if isinstance(document, basestring):
+        if isinstance(document, str):
             raise TypeError("doc2bow expects an array of utf8 tokens on input, not a string")
-        document = sorted(utils.to_utf8(token) for token in document)
+        document = sorted(token for token in document)
         # construct (word, frequency) mapping. in python3 this is done simply
         # using Counter(), but here i use itertools.groupby() for the job
         for word_norm, group in itertools.groupby(document):
@@ -137,11 +159,11 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
             self.num_pos += len(document)
             self.num_nnz += len(result)
             # increase document count for each unique token that appeared in the document
-            for tokenid in result.iterkeys():
+            for tokenid in result.keys():
                 self.dfs[tokenid] = self.dfs.get(tokenid, 0) + 1
 
         # return tokenids, in ascending id order
-        result = sorted(result.iteritems())
+        result = sorted(result.items())
         if return_missing:
             return result, missing
         else:
@@ -166,7 +188,7 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         no_above_abs = int(no_above * self.num_docs) # convert fractional threshold to absolute threshold
 
         # determine which tokens to keep
-        good_ids = (v for v in self.token2id.itervalues() if no_below <= self.dfs[v] <= no_above_abs)
+        good_ids = (v for v in self.token2id.values() if no_below <= self.dfs[v] <= no_above_abs)
         good_ids = sorted(good_ids, key=self.dfs.get, reverse=True)
         if keep_n is not None:
             good_ids = good_ids[:keep_n]
@@ -188,12 +210,12 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         """
         if bad_ids is not None:
             bad_ids = set(bad_ids)
-            self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.iteritems() if tokenid not in bad_ids)
-            self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.iteritems() if tokenid not in bad_ids)
+            self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.items() if tokenid not in bad_ids)
+            self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.items() if tokenid not in bad_ids)
         if good_ids is not None:
             good_ids = set(good_ids)
-            self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.iteritems() if tokenid in good_ids)
-            self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.iteritems() if tokenid in good_ids)
+            self.token2id = dict((token, tokenid) for token, tokenid in self.token2id.items() if tokenid in good_ids)
+            self.dfs = dict((tokenid, freq) for tokenid, freq in self.dfs.items() if tokenid in good_ids)
 
 
     def compactify(self):
@@ -207,12 +229,12 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         logger.debug("rebuilding dictionary, shrinking gaps")
 
         # build mapping from old id -> new id
-        idmap = dict(itertools.izip(self.token2id.itervalues(), xrange(len(self.token2id))))
+        idmap = dict(zip(iter(self.token2id.values()), range(len(self.token2id))))
 
         # reassign mappings to new ids
-        self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
+        self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.items())
         self.id2token = {}
-        self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())
+        self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.items())
 
 
     def save_as_text(self, fname):
@@ -224,8 +246,8 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         """
         logger.info("saving dictionary mapping to %s" % fname)
         with utils.smart_open(fname, 'wb') as fout:
-            for token, tokenid in sorted(self.token2id.iteritems()):
-                fout.write("%i\t%s\t%i\n" % (tokenid, token, self.dfs.get(tokenid, 0)))
+            for token, tokenid in sorted(self.token2id.items()):
+                fout.write(("%i\t%s\t%i\n" % (tokenid, token, self.dfs.get(tokenid, 0))).encode())
 
 
     def merge_with(self, other):
@@ -250,7 +272,7 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
 
         """
         old2new = {}
-        for other_id, other_token in other.iteritems():
+        for other_id, other_token in other.items():
             if other_token in self.token2id:
                 new_id = self.token2id[other_token]
             else:
@@ -284,7 +306,7 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
         with utils.smart_open(fname, 'rb') as f:
             for lineno, line in enumerate(f):
                 try:
-                    wordid, word, docfreq = line[:-1].split('\t')
+                    wordid, word, docfreq = (line.decode())[:-1].split('\t')
                 except Exception:
                     raise ValueError("invalid line in dictionary file %s: %s"
                                      % (fname, line.strip()))
@@ -319,7 +341,7 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
                 result.num_pos += word_freq
                 result.dfs[wordid] = result.dfs.get(wordid, 0) + 1
         # now make sure length(result) == get_max_id(corpus) + 1
-        for i in xrange(max_id + 1):
+        for i in range(max_id + 1):
             result.token2id[str(i)] = i
 
         logger.info("built %s from %i documents (total %i corpus positions)" %

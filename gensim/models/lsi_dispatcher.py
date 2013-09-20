@@ -14,9 +14,9 @@ Example: python -m gensim.models.lsi_dispatcher
 """
 
 
-from __future__ import with_statement
+
 import os, sys, logging, threading, time
-from Queue import Queue
+from queue import Queue
 
 from gensim import utils
 
@@ -70,7 +70,7 @@ class Dispatcher(object):
             import Pyro4
             self.callback = Pyro4.Proxy('PYRONAME:gensim.lsi_dispatcher') # = self
             self.callback._pyroOneway.add("jobdone") # make sure workers transfer control back to dispatcher asynchronously
-            for name, uri in ns.list(prefix='gensim.lsi_worker').iteritems():
+            for name, uri in ns.list(prefix='gensim.lsi_worker').items():
                 try:
                     worker = Pyro4.Proxy(uri)
                     workerid = len(self.workers)
@@ -81,7 +81,7 @@ class Dispatcher(object):
                     worker.initialize(workerid, dispatcher=self.callback, **model_params)
                     self.workers[workerid] = worker
                     worker.requestjob()
-                except Pyro4.errors.PyroError, err:
+                except Pyro4.errors.PyroError as err:
                     logger.exception("unresponsive worker at %s, deleting it from the name server" % uri)
                     ns.remove(name)
 
@@ -93,7 +93,7 @@ class Dispatcher(object):
         """
         Return pyro URIs of all registered workers.
         """
-        return [worker._pyroUri for worker in self.workers.itervalues()]
+        return [worker._pyroUri for worker in self.workers.values()]
 
 
     def getjob(self, worker_id):
@@ -122,7 +122,7 @@ class Dispatcher(object):
         # but merging only takes place once, after all input data has been processed,
         # so the overall effect would be small... compared to the amount of coding :-)
         logger.info("merging states from %i workers" % len(self.workers))
-        workers = self.workers.items()
+        workers = list(self.workers.items())
         result = workers[0][1].getstate()
         for workerid, worker in workers[1:]:
             logger.info("pulling state from worker %s" % workerid)
@@ -155,7 +155,7 @@ class Dispatcher(object):
         """
         Terminate all registered workers and then the dispatcher.
         """
-        for workerid, worker in self.workers.iteritems():
+        for workerid, worker in self.workers.items():
             logger.info("terminating worker %s" % workerid)
             worker.exit()
         logger.info("terminating dispatcher")
@@ -171,7 +171,7 @@ def main():
     program = os.path.basename(sys.argv[0])
     # make sure we have enough cmd line parameters
     if len(sys.argv) < 1:
-        print globals()["__doc__"] % locals()
+        print(globals()["__doc__"] % locals())
         sys.exit(1)
 
     if len(sys.argv) < 2:

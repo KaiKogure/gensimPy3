@@ -16,7 +16,7 @@ Example: python -m gensim.models.lsi_worker
 """
 
 
-from __future__ import with_statement
+
 import os, sys, logging
 import threading
 import tempfile
@@ -91,7 +91,7 @@ def main():
     program = os.path.basename(sys.argv[0])
     # make sure we have enough cmd line parameters
     if len(sys.argv) < 1:
-        print globals()["__doc__"] % locals()
+        print(globals()["__doc__"] % locals())
         sys.exit(1)
 
     utils.pyro_daemon('gensim.lsi_worker', Worker(), random_suffix=True)

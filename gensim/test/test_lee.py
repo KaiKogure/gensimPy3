@@ -22,7 +22,7 @@ An empirical evaluation of models of text document similarity.
 Proceedings of the 27th Annual Conference of the Cognitive Science Society
 """
 
-from __future__ import with_statement
+
 
 import logging
 import os.path

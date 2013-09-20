@@ -207,7 +207,7 @@ class LdaModel(interfaces.TransformationABC):
             self.id2word = utils.dict_from_corpus(corpus)
             self.num_terms = len(self.id2word)
         else:
-            self.num_terms = 1 + max([-1] + self.id2word.keys())
+            self.num_terms = 1 + max([-1] + list(self.id2word.keys()))
 
         if self.num_terms == 0:
             raise ValueError("cannot compute LDA over an empty collection (no terms)")
@@ -251,7 +251,7 @@ class LdaModel(interfaces.TransformationABC):
                 self.dispatcher = dispatcher
                 self.numworkers = len(dispatcher.getworkers())
                 logger.info("using distributed version with %i workers" % self.numworkers)
-            except Exception, err:
+            except Exception as err:
                 logger.error("failed to initialize distributed LDA (%s)" % err)
                 raise RuntimeError("failed to initialize distributed LDA (%s)" % err)
 
@@ -328,7 +328,7 @@ class LdaModel(interfaces.TransformationABC):
             phinorm = numpy.dot(expElogthetad, expElogbetad) + 1e-100 # TODO treat zeros explicitly, instead of adding eps?
 
             # Iterate between gamma and phi until convergence
-            for _ in xrange(self.VAR_MAXITER):
+            for _ in range(self.VAR_MAXITER):
                 lastgamma = gammad
                 # We represent phi implicitly to save memory and time.
                 # Substituting the value of the optimal phi back into
@@ -430,7 +430,7 @@ class LdaModel(interfaces.TransformationABC):
             logger.warning("too few updates, training might not converge; consider "
                            "increasing the number of passes to improve accuracy")
 
-        for iteration in xrange(passes):
+        for iteration in range(passes):
             if self.dispatcher:
                 logger.info('initializing %s workers' % self.numworkers)
                 self.dispatcher.reset(self.state)
@@ -522,7 +522,7 @@ class LdaModel(interfaces.TransformationABC):
             ids = [id for id, _ in doc]
             cts = numpy.array([cnt for _, cnt in doc])
             phinorm = numpy.zeros(len(ids))
-            for i in xrange(len(ids)):
+            for i in range(len(ids)):
                 phinorm[i] = logsumexp(Elogthetad + Elogbeta[:, ids[i]])
 
             # E[log p(docs | theta, beta)]
@@ -557,7 +557,7 @@ class LdaModel(interfaces.TransformationABC):
             topics = self.num_topics
         topics = min(topics, self.num_topics)
         shown = []
-        for i in xrange(topics):
+        for i in range(topics):
             if formatted:
                 topic = self.print_topic(i, topn=topn)
             else:

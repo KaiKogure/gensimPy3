@@ -8,7 +8,7 @@
 This module contains various general utility functions.
 """
 
-from __future__ import with_statement
+
 
 import logging
 logger = logging.getLogger('gensim.utils')
@@ -17,11 +17,11 @@ import re
 import unicodedata
 import os
 import random
-import cPickle
+import pickle as modPkl
 import itertools
 import tempfile
 from functools import wraps # for `synchronous` function lock
-from htmlentitydefs import name2codepoint as n2cp # for `decode_htmlentities`
+from html.entities import name2codepoint as n2cp # for `decode_htmlentities`
 import multiprocessing
 import shutil
 import traceback
@@ -50,12 +50,12 @@ def synchronous(tlockname):
         @wraps(func)
         def _synchronizer(self, *args, **kwargs):
             tlock = getattr(self, tlockname)
-            logger.debug("acquiring lock %r for %s" % (tlockname, func.func_name))
+            logger.debug("acquiring lock %r for %s" % (tlockname, func.__name__))
 
             with tlock: # use lock as a context manager to perform safe acquire/release pairs
-                logger.debug("acquired lock %r for %s" % (tlockname, func.func_name))
+                logger.debug("acquired lock %r for %s" % (tlockname, func.__name__))
                 result = func(self, *args, **kwargs)
-                logger.debug("releasing lock %r for %s" % (tlockname, func.func_name))
+                logger.debug("releasing lock %r for %s" % (tlockname, func.__name__))
                 return result
         return _synchronizer
     return _synched
@@ -82,10 +82,10 @@ def deaccent(text):
     >>> deaccent("Šéf chomutovských komunistů dostal poštou bílý prášek")
     u'Sef chomutovskych komunistu dostal postou bily prasek'
     """
-    if not isinstance(text, unicode):
-        text = unicode(text, 'utf8') # assume utf8 for byte strings, use default (strict) error handling
+    if not isinstance(text, str):
+        text = str(text, 'utf8') # assume utf8 for byte strings, use default (strict) error handling
     norm = unicodedata.normalize("NFD", text)
-    result = u''.join(ch for ch in norm if unicodedata.category(ch) != 'Mn')
+    result = ''.join(ch for ch in norm if unicodedata.category(ch) != 'Mn')
     return unicodedata.normalize("NFC", result)
 
 
@@ -116,8 +116,8 @@ def tokenize(text, lowercase=False, deacc=False, errors="strict", to_lower=False
     [u'Nic', u'nemuze', u'letet', u'rychlosti', u'vyssi', u'nez', u'tisic', u'kilometru', u'za', u'sekundu']
     """
     lowercase = lowercase or to_lower or lower
-    if not isinstance(text, unicode):
-        text = unicode(text, encoding='utf8', errors=errors)
+    if not isinstance(text, str):
+        text = str(text, encoding='utf8', errors=errors)
     if lowercase:
         text = text.lower()
     if deacc:
@@ -141,18 +141,18 @@ def simple_preprocess(doc, deacc=False):
 def any2utf8(text, errors='strict', encoding='utf8'):
     """Convert a string (unicode or bytestring in `encoding`), to bytestring in utf8.
     """
-    if isinstance(text, unicode):
+    if isinstance(text, str):
         return text.encode('utf8')
     # do bytestring -> unicode -> utf8 full circle, to ensure valid utf8
-    return unicode(text, encoding, errors=errors).encode('utf8')
+    return str(text, encoding, errors=errors).encode('utf8')
 to_utf8 = any2utf8
 
 
 def any2unicode(text, encoding='utf8', errors='strict'):
     """Convert a string (bytestring in `encoding` or unicode), to unicode."""
-    if isinstance(text, unicode):
+    if isinstance(text, str):
         return text
-    return unicode(text, encoding, errors=errors)
+    return str(text, encoding, errors=errors)
 to_unicode = any2unicode
 
 
@@ -220,7 +220,7 @@ class FakeDict(object):
                          (val, self.num_terms))
 
     def iteritems(self):
-        for i in xrange(self.num_terms):
+        for i in range(self.num_terms):
             yield i, str(i)
 
     def keys(self):
@@ -278,13 +278,13 @@ def is_corpus(obj):
             # the input is an iterator object, meaning once we call next()
             # that element could be gone forever. we must be careful to put
             # whatever we retrieve back again
-            doc1 = obj.next()
+            doc1 = next(obj)
             obj = itertools.chain([doc1], obj)
         else:
-            doc1 = iter(obj).next() # empty corpus is resolved to False here
+            doc1 = next(iter(obj)) # empty corpus is resolved to False here
         if len(doc1) == 0: # sparse documents must have a __len__ function (list, tuple...)
             return True, obj # the first document is empty=>assume this is a corpus
-        id1, val1 = iter(doc1).next() # if obj is a numpy array, it resolves to False here
+        id1, val1 = next(iter(doc1)) # if obj is a numpy array, it resolves to False here
         id1, val1 = int(id1), float(val1) # must be a 2-tuple (integer, float)
     except:
         return False, obj
@@ -312,8 +312,8 @@ def get_my_ip():
     except:
         try:
             # see what ifconfig says about our default interface
-            import commands
-            result = commands.getoutput("ifconfig").split("\n")[1].split()[1][5:]
+            import subprocess
+            result = subprocess.getoutput("ifconfig").split("\n")[1].split()[1][5:]
             if len(result.split('.')) != 4:
                 raise Exception()
         except:
@@ -367,15 +367,15 @@ def decode_htmlentities(text):
             # decoding by number
             if match.group(2) == '':
                 # number is in decimal
-                return unichr(int(ent))
+                return chr(int(ent))
             elif match.group(2) == 'x':
                 # number is in hex
-                return unichr(int('0x' + ent, 16))
+                return chr(int('0x' + ent, 16))
         else:
             # they were using a name
             cp = n2cp.get(ent)
             if cp:
-                return unichr(cp)
+                return chr(cp)
             else:
                 return match.group()
 
@@ -511,12 +511,12 @@ def smart_open(fname, mode):
 def pickle(obj, fname, protocol=-1):
     """Pickle object `obj` to file `fname`."""
     with smart_open(fname, 'wb') as fout: # 'b' for binary, needed on Windows
-        cPickle.dump(obj, fout, protocol=protocol)
+        modPkl.dump(obj, fout, protocol=protocol)
 
 
 def unpickle(fname):
     """Load pickled object from `fname`"""
-    return cPickle.load(smart_open(fname, 'rb'))
+    return modPkl.load(smart_open(fname, 'rb'))
 
 
 def revdict(d):
@@ -525,7 +525,7 @@ def revdict(d):
 
     When two keys map to the same value, only one of them will be kept in the
     result (which one is kept is arbitrary)."""
-    return dict((v, k) for (k, v) in d.iteritems())
+    return dict((v, k) for (k, v) in d.items())
 
 
 def toptexts(query, texts, index, n=10):
@@ -638,7 +638,7 @@ if HAS_PATTERN:
         # producing '==relate/VBN' or '**/NN'... try to preprocess the text a little
         # FIXME this throws away all fancy parsing cues, including sentence structure,
         # abbreviations etc.
-        content = u' '.join(tokenize(content, lower=True, errors='ignore'))
+        content = ' '.join(tokenize(content, lower=True, errors='ignore'))
 
         # use simpler, modified pattern.text.en.text.parser.parse that doesn't
         # collapse the output at the end: https://github.com/piskvorky/pattern

@@ -20,7 +20,7 @@ import re
 from gensim.corpora import sources, dmlcorpus, MmCorpus
 from gensim.similarities import MatrixSimilarity, SparseMatrixSimilarity
 
-import gensim_build
+from . import gensim_build
 
 
 # set to True to do everything EXCEPT actually writing out similar.xml files to disk.
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     # check and process input arguments
     if len(sys.argv) < 3:
-        print globals()['__doc__'] % locals()
+        print(globals()['__doc__'] % locals())
         sys.exit(1)
     language = sys.argv[1]
     method = sys.argv[2].strip().lower()

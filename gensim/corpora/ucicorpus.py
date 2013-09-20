@@ -11,7 +11,7 @@ University of California, Irvine (UCI) Bag-of-Words format.
 http://archive.ics.uci.edu/ml/datasets/Bag+of+Words
 """
 
-from __future__ import with_statement
+
 
 import logging
 from collections import defaultdict
@@ -39,13 +39,13 @@ class UciReader(MmReader):
 
         self.input = input
 
-        if isinstance(input, basestring):
+        if isinstance(input, str):
             input = open(input)
 
         self.num_docs = self.num_terms = self.num_nnz = 0
-        self.num_docs = int(input.next().strip())
-        self.num_terms = int(input.next().strip())
-        self.num_nnz = int(input.next().strip())
+        self.num_docs = int(next(input).strip())
+        self.num_terms = int(next(input).strip())
+        self.num_nnz = int(next(input).strip())
 
         logger.info('accepted corpus with %i documents, %i features, %i non-zero entries' %
             (self.num_docs, self.num_terms, self.num_nnz))
@@ -76,7 +76,7 @@ class UciWriter(MmWriter):
         Write blank header lines. Will be updated later, once corpus stats are known.
         """
         for _ in range(3):
-            self.fout.write(' ' * UciWriter.MAX_HEADER_LENGTH + '\n') # 20 digits per value
+            self.fout.write((' ' * UciWriter.MAX_HEADER_LENGTH + '\n').encode()) # 20 digits per value
 
         self.last_docno = -1
         self.headers_written = True
@@ -92,7 +92,7 @@ class UciWriter(MmWriter):
             if len(value) > UciWriter.MAX_HEADER_LENGTH:
                 raise ValueError('Invalid header: value too large!')
             self.fout.seek(offset)
-            self.fout.write(value)
+            self.fout.write(value.encode())
             offset += UciWriter.MAX_HEADER_LENGTH + len('\n')
 
     @staticmethod
@@ -173,7 +173,7 @@ class UciCorpus(UciReader, IndexedCorpus):
         dictionary.dfs = defaultdict(int)
 
         dictionary.id2token = self.id2word
-        dictionary.token2id = dict((v, k) for k, v in self.id2word.iteritems())
+        dictionary.token2id = dict((v, k) for k, v in self.id2word.items())
 
         dictionary.num_docs = self.num_docs
         dictionary.num_nnz = self.num_nnz
@@ -204,14 +204,14 @@ class UciCorpus(UciReader, IndexedCorpus):
             id2word = utils.dict_from_corpus(corpus)
             num_terms = len(id2word)
         else:
-            num_terms = 1 + max([-1] + id2word.keys())
+            num_terms = 1 + max([-1] + list(id2word.keys()))
 
         # write out vocabulary
         fname_vocab = fname + '.vocab'
         logger.info("saving vocabulary of %i words to %s" % (num_terms, fname_vocab))
         with open(fname_vocab, 'w') as fout:
-            for featureid in xrange(num_terms):
-                fout.write("%s\n" % utils.to_utf8(id2word.get(featureid, '---')))
+            for featureid in range(num_terms):
+                fout.write(("%s\n" % id2word.get(featureid, '---').encode()))
 
         logger.info("storing corpus in UCI Bag-of-Words format: %s" % fname)
 

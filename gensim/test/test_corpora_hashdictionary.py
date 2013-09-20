@@ -53,7 +53,7 @@ class TestHashDictionary(unittest.TestCase):
         # only one token (human) should exist
         expected = {'human': 31002}
         self.assertEqual(d.token2id['human'], expected['human'])
-        self.assertEqual(d.token2id.keys(), expected.keys())
+        self.assertEqual(list(d.token2id.keys()), list(expected.keys()))
 
         # three docs
         texts = [['human'], ['human'], ['human']]
@@ -63,7 +63,7 @@ class TestHashDictionary(unittest.TestCase):
         # only one token (human) should exist
         expected = {'human': 31002}
         self.assertEqual(d.token2id['human'], expected['human'])
-        self.assertEqual(d.token2id.keys(), expected.keys())
+        self.assertEqual(list(d.token2id.keys()), list(expected.keys()))
 
         # four docs
         texts = [['human'], ['human'], ['human'], ['human']]
@@ -73,7 +73,7 @@ class TestHashDictionary(unittest.TestCase):
         # only one token (human) should exist
         expected = {'human': 31002}
         self.assertEqual(d.token2id['human'], expected['human'])
-        self.assertEqual(d.token2id.keys(), expected.keys())
+        self.assertEqual(list(d.token2id.keys()), list(expected.keys()))
 
     def testDocFreqForOneDocWithSeveralWord(self):
         # two words

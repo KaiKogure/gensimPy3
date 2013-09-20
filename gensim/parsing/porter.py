@@ -95,7 +95,7 @@ class PorterStemmer(object):
 
     def _vowelinstem(self):
         """True <=> 0,...j contains a vowel"""
-        return not all(self._cons(i) for i in xrange(self.j + 1))
+        return not all(self._cons(i) for i in range(self.j + 1))
 
     def _doublec(self, j):
         """True <=> j,(j-1) contain a double consonant."""
@@ -313,7 +313,7 @@ class PorterStemmer(object):
         return " ".join(map(self.stem, txt.split()))
 
     def stem_documents(self, docs):
-        return map(self.stem_sentence, docs)
+        return list(map(self.stem_sentence, docs))
 
 
 if __name__ == '__main__':
@@ -324,4 +324,4 @@ if __name__ == '__main__':
     for f in sys.argv[1:]:
         with open(f) as infile:
             for line in infile:
-                print(p.stem_sentence(line))
+                print((p.stem_sentence(line)))

@@ -42,7 +42,7 @@ def strip_punctuation(s):
 
 
 def strip_punctuation2(s):
-    return s.translate(string.maketrans("", ""), string.punctuation)
+    return s.translate(str.maketrans(dict.fromkeys(string.punctuation)))
 
 
 def strip_tags(s):
@@ -93,7 +93,7 @@ def preprocess_string(s, filters=DEFAULT_FILTERS):
 
 
 def preprocess_documents(docs):
-    return map(preprocess_string, docs)
+    return list(map(preprocess_string, docs))
 
 
 def read_file(path):
@@ -101,4 +101,4 @@ def read_file(path):
 
 
 def read_files(pattern):
-    return map(read_file, glob.glob(pattern))
+    return list(map(read_file, glob.glob(pattern)))

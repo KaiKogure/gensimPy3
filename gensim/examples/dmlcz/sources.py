@@ -175,7 +175,7 @@ class DmlSource(ArticleSource):
 
 
     def normalizeWord(self, word):
-        wordU = unicode(word, 'utf8')
+        wordU = str(word, 'utf8')
         return wordU.lower().encode('utf8') # lowercase and then convert back to bytestring
 #endclass DmlSource
 
@@ -365,7 +365,7 @@ class ArxmlivSource(ArticleSource):
     def normalizeWord(self, word):
         if word[0] == '$': # ignore math tokens
             return word
-        wordU = unicode(word, 'utf8')
+        wordU = str(word, 'utf8')
         return wordU.lower().encode('utf8') # lowercase and then convert back to bytestring
 #endclass ArxmlivSource
 
