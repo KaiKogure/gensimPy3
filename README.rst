@@ -3,6 +3,8 @@ gensim -- Python Framework for Topic Modelling
 ==============================================
 
 
+This is the python 3.3 port of Gensim library available at: <http://radimrehurek.com/gensim/>. This port might be useful if people need gensim on Python3. It is not backward compatible with Python 2.
+
 Gensim is a Python library for *topic modelling*, *document indexing* and *similarity retrieval* with large corpora.
 Target audience is the *natural language processing* (NLP) and *information retrieval* (IR) community.
 
@@ -48,7 +50,7 @@ you'll need to run::
 For alternative modes of installation (without root privileges, development
 installation, optional install features), see the `documentation <http://radimrehurek.com/gensim/install.html>`_.
 
-This version has been tested under Python 2.5, 2.6 and 2.7, and should run on any 2.5 <= Python < 3.0.
+This version has been tested under Python 3.3, and should run on any 3.0 <= Python < 3.3.
 
 Documentation
 -------------
