@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <SchemaVersion>2.0</SchemaVersion>
+        <ProjectGuid>{12ba3b47-2ce2-473d-a6eb-f23e96a76504}</ProjectGuid>
+        <ProjectHome />
+        <StartupFile />
+        <SearchPath />
+        <WorkingDirectory>.</WorkingDirectory>
+        <OutputPath>.</OutputPath>
+        <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+        <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+    <ItemGroup>
+        <Compile Include="gensim-develop\ez_setup.py" />
+        <Compile Include="gensim-develop\setup.py" />
+        <Compile Include="gensim-develop\__init__.py" />
+        <Compile Include="gensim-develop\docs\src\conf.py" />
+        <Compile Include="gensim-develop\gensim\interfaces.py" />
+        <Compile Include="gensim-develop\gensim\matutils.py" />
+        <Compile Include="gensim-develop\gensim\nosy.py" />
+        <Compile Include="gensim-develop\gensim\utils.py" />
+        <Compile Include="gensim-develop\gensim\__init__.py" />
+        <Compile Include="gensim-develop\gensim\corpora\bleicorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\dictionary.py" />
+        <Compile Include="gensim-develop\gensim\corpora\hashdictionary.py" />
+        <Compile Include="gensim-develop\gensim\corpora\indexedcorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\lowcorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\mmcorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\svmlightcorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\textcorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\ucicorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\wikicorpus.py" />
+        <Compile Include="gensim-develop\gensim\corpora\__init__.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\dmlcorpus.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\gensim_build.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\gensim_genmodel.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\gensim_xml.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\sources.py" />
+        <Compile Include="gensim-develop\gensim\examples\dmlcz\__init__.py" />
+        <Compile Include="gensim-develop\gensim\models\hdpmodel.py" />
+        <Compile Include="gensim-develop\gensim\models\ldamodel.py" />
+        <Compile Include="gensim-develop\gensim\models\lda_dispatcher.py" />
+        <Compile Include="gensim-develop\gensim\models\lda_worker.py" />
+        <Compile Include="gensim-develop\gensim\models\logentropy_model.py" />
+        <Compile Include="gensim-develop\gensim\models\lsimodel.py" />
+        <Compile Include="gensim-develop\gensim\models\lsi_dispatcher.py" />
+        <Compile Include="gensim-develop\gensim\models\lsi_worker.py" />
+        <Compile Include="gensim-develop\gensim\models\rpmodel.py" />
+        <Compile Include="gensim-develop\gensim\models\tfidfmodel.py" />
+        <Compile Include="gensim-develop\gensim\models\word2vec.py" />
+        <Compile Include="gensim-develop\gensim\models\__init__.py" />
+        <Compile Include="gensim-develop\gensim\parsing\porter.py" />
+        <Compile Include="gensim-develop\gensim\parsing\preprocessing.py" />
+        <Compile Include="gensim-develop\gensim\parsing\__init__.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wiki.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wikicorpus.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wiki_lemma.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wiki_online.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wiki_online_lemma.py" />
+        <Compile Include="gensim-develop\gensim\scripts\make_wiki_online_nodebug.py" />
+        <Compile Include="gensim-develop\gensim\scripts\__init__.py" />
+        <Compile Include="gensim-develop\gensim\similarities\docsim.py" />
+        <Compile Include="gensim-develop\gensim\similarities\__init__.py" />
+        <Compile Include="gensim-develop\gensim\test\simspeed.py" />
+        <Compile Include="gensim-develop\gensim\test\simspeed2.py" />
+        <Compile Include="gensim-develop\gensim\test\svd_error.py" />
+        <Compile Include="gensim-develop\gensim\test\test_corpora.py" />
+        <Compile Include="gensim-develop\gensim\test\test_corpora_dictionary.py" />
+        <Compile Include="gensim-develop\gensim\test\test_corpora_hashdictionary.py" />
+        <Compile Include="gensim-develop\gensim\test\test_lee.py" />
+        <Compile Include="gensim-develop\gensim\test\test_miislita.py" />
+        <Compile Include="gensim-develop\gensim\test\test_models.py" />
+        <Compile Include="gensim-develop\gensim\test\test_parsing.py" />
+        <Compile Include="gensim-develop\gensim\test\test_similarities.py" />
+        <Compile Include="gensim-develop\gensim\test\test_utils.py" />
+        <Compile Include="gensim-develop\gensim\test\__init__.py" />
+        <Content Include="gensim-develop\CHANGELOG.txt" />
+        <Content Include="gensim-develop\TODO.txt" />
+        <Content Include="gensim-develop\gensim\test\test_data\head500.noblanks.cor_wordids.txt" />
+        <Content Include="gensim-develop\gensim\test\test_data\para2para_text1.txt" />
+        <Content Include="gensim-develop\gensim\test\test_data\para2para_text2.txt" />
+        <Content Include="gensim-develop\gensim\test\test_data\similarities0-1.txt" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\domainindex.html" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\genindex.html" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\layout.html" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\page.html" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\search.html" />
+        <Content Include="gensim-develop\docs\src\_templates\indexcontent.html" />
+        <Content Include="gensim-develop\docs\src\_static\css\anythingslider.css" />
+        <Content Include="gensim-develop\docs\src\_static\css\jquery.qtip.min.css" />
+        <Content Include="gensim-develop\docs\src\_static\css\style.css" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\static\doctools.js" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\static\jquery.js" />
+        <Content Include="gensim-develop\docs\src\gensim_theme\static\underscore.js" />
+        <Content Include="gensim-develop\docs\src\_static\js\jquery-1.9.1.min.js" />
+        <Content Include="gensim-develop\docs\src\_static\js\jquery-migrate-1.1.1.min.js" />
+        <Content Include="gensim-develop\docs\src\_static\js\jquery.anythingslider.min.js" />
+        <Content Include="gensim-develop\docs\src\_static\js\jquery.qtip.min.js" />
+        <Content Include="gensim-develop\docs\src\_static\images\arrows.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\bg.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\bullets.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\checker.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\default.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\direct-install.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\download.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\forkme_left_white_ffffff.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\gensim-footer.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\gensim.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\gensim_code.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\gensim_compact.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\get-started.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\googlegroups.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\logo-gensim.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\logo-gensim_compact.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\menubutton.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\tagline.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\tagline_compact.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\twitterbird.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\ukazka.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\ukazka2.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\converters.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\efficient_implementations.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\free_lgpl.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\memory_independence.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\platform_independence.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\robust.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\similarity_queries.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\features\support.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_dynadmic.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_eudml.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_ghent.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_ibcn.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_roistr.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_sportsauthority.png" />
+        <Content Include="gensim-develop\docs\src\_static\images\loading.gif" />
+        <Content Include="gensim-develop\docs\src\_static\images\references\logo_dtu.gif" />
+        <Content Include="gensim-develop\docs\src\_static\favicon.ico" />
+        <Content Include="gensim-develop\docs\src\_static\images\favicon.ico" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="gensim-develop" />
+        <Folder Include="gensim-develop\docs\src" />
+        <Folder Include="gensim-develop\docs\src\_static" />
+        <Folder Include="gensim-develop\docs\src\_static\css" />
+        <Folder Include="gensim-develop\docs\src\_static\images" />
+        <Folder Include="gensim-develop\docs\src\_static\images\features" />
+        <Folder Include="gensim-develop\docs\src\_static\images\references" />
+        <Folder Include="gensim-develop\docs\src\_static\js" />
+        <Folder Include="gensim-develop\docs\src\_templates" />
+        <Folder Include="gensim-develop\docs\src\gensim_theme" />
+        <Folder Include="gensim-develop\docs\src\gensim_theme\static" />
+        <Folder Include="gensim-develop\gensim" />
+        <Folder Include="gensim-develop\gensim\corpora" />
+        <Folder Include="gensim-develop\gensim\examples\dmlcz" />
+        <Folder Include="gensim-develop\gensim\models" />
+        <Folder Include="gensim-develop\gensim\parsing" />
+        <Folder Include="gensim-develop\gensim\scripts" />
+        <Folder Include="gensim-develop\gensim\similarities" />
+        <Folder Include="gensim-develop\gensim\test" />
+        <Folder Include="gensim-develop\gensim\test\test_data" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>
